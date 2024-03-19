@@ -81,9 +81,18 @@ struct BlendConfig {
 }
 
 #[derive(Deserialize, Debug, Clone)]
+struct LayerBlendConfig {
+    layer: usize,
+    coefficient: f32,
+}
+
+#[derive(Deserialize, Debug, Clone)]
 struct LoraConfig {
     path: PathBuf,
-    blends: Vec<BlendConfig>,
+    layer_matrix_coefficient: f32,
+    layerwise_blends: Vec<LayerBlendConfig>,
+    #[serde(default)]
+    regex_blends: Vec<BlendConfig>,
 }
 
 impl LoraConfig {
@@ -96,15 +105,24 @@ impl LoraConfig {
 
         let buffer = buffer.leak();
         let data = SafeTensors::deserialize(buffer)?;
-        Ok(Lora {
+        let mut lora = Lora {
             data,
-            blend: LoraBlend(
-                self.blends
-                    .iter()
-                    .map(|BlendConfig { pattern, alpha }| LoraBlendPattern::new(pattern, *alpha))
-                    .collect::<Result<_>>()?,
-            ),
-        })
+            blend: LoraBlend::default(),
+        };
+        for blend in self.layerwise_blends.iter() {
+            self.add_layer_nominal(&mut lora, blend.layer, blend.coefficient);
+            lora.blend = lora.blend.add_layer_matrices(blend.layer, self.layer_matrix_coefficient*blend.coefficient);
+        }
+        for blend in self.regex_blends.iter() {
+            lora.blend.0.push(LoraBlendPattern::new(&blend.pattern, blend.alpha)?);
+        }
+        Ok(lora)
+    }
+
+    fn add_layer_nominal(&self, lora: &mut Lora<SafeTensors>, layer: usize, alpha: f32) {
+        lora.blend
+            .0
+            .push(LoraBlendPattern::new(format!(r"blocks\.({layer}).*").as_str(), alpha).unwrap());
     }
 }
 
@@ -204,7 +222,9 @@ impl ModelSpec {
             .await
             .into_iter()
             .collect::<Result<Vec<_>>>()?;
-
+        if loras.is_empty() {
+            log::info!("No Lora Configs found. Loading base model.");
+        }
         Ok(match info.version {
             V4 => AxumModel::V4({
                 let mut builder = ModelBuilder::new(context, model)
