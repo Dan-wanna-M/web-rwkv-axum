@@ -1272,6 +1272,7 @@ dependencies = [
  "cfg-if",
  "crunchy",
  "num-traits",
+ "serde",
 ]
 
 [[package]]
@@ -1440,6 +1441,18 @@ checksum = "d530e1a18b1cb4c484e6e34556a0d948706958449fca0cab753d649f2bce3d1f"
 dependencies = [
  "equivalent",
  "hashbrown 0.14.3",
+]
+
+[[package]]
+name = "instant"
+version = "0.1.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7a5bbe824c507c5da5956355e86a746d82e0e1464f65d862cc5e71da70e94b2c"
+dependencies = [
+ "cfg-if",
+ "js-sys",
+ "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]
@@ -2260,6 +2273,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_bytes"
+version = "0.11.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b8497c313fd43ab992087548117643f6fcd935cbf36f176ffda0aacf9591734"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "serde_cbor"
 version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2931,9 +2953,9 @@ checksum = "4d91413b1c31d7539ba5ef2451af3f0b833a005eb27a631cec32bc0635a8602b"
 
 [[package]]
 name = "web-rwkv"
-version = "0.6.28"
+version = "0.6.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "92e81b8109e0d8f9775fde3de0dd2f83d2f68ae5f5a426c539a76c0013cf3976"
+checksum = "b7e53b6b2c13c2d8ef0dded9221a60e19d4443d7270bbab9bbd0724a77446c3c"
 dependencies = [
  "ahash",
  "anyhow",
@@ -2944,12 +2966,14 @@ dependencies = [
  "futures",
  "gpp",
  "half 2.3.1",
+ "instant",
  "itertools 0.12.1",
  "lazy_static",
  "log",
  "regex",
  "safetensors",
  "serde",
+ "serde_bytes",
  "serde_json",
  "thiserror",
  "trait-variant",
@@ -3002,10 +3026,11 @@ dependencies = [
 
 [[package]]
 name = "web-rwkv-derive"
-version = "0.2.3"
+version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88c7b59d6d38c6c6a3f96ce6ef2dd66d92924e7c2206331d055040fd5c653551"
+checksum = "e6e437989ba9fff469ccdfb7b850a8f81a749a6ae74800de0d2d6fea68328fbd"
 dependencies = [
+ "proc-macro2",
  "quote",
  "syn 2.0.48",
 ]

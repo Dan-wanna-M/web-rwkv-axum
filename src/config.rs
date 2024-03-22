@@ -110,19 +110,20 @@ impl LoraConfig {
             blend: LoraBlend::default(),
         };
         for blend in self.layerwise_blends.iter() {
-            self.add_layer_nominal(&mut lora, blend.layer, blend.coefficient);
-            lora.blend = lora.blend.add_layer_matrices(blend.layer, self.layer_matrix_coefficient*blend.coefficient);
+            lora.blend = lora
+                .blend
+                .add_layer_nominal(blend.layer, blend.coefficient)
+                .add_layer_matrices(
+                    blend.layer,
+                    self.layer_matrix_coefficient * blend.coefficient,
+                );
         }
         for blend in self.regex_blends.iter() {
-            lora.blend.0.push(LoraBlendPattern::new(&blend.pattern, blend.alpha)?);
+            lora.blend
+                .0
+                .push(LoraBlendPattern::new(&blend.pattern, blend.alpha)?);
         }
         Ok(lora)
-    }
-
-    fn add_layer_nominal(&self, lora: &mut Lora<SafeTensors>, layer: usize, alpha: f32) {
-        lora.blend
-            .0
-            .push(LoraBlendPattern::new(format!(r"blocks\.({layer}).*").as_str(), alpha).unwrap());
     }
 }
 
